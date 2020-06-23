@@ -13,6 +13,7 @@ export interface ReactTagInputProps {
   editable?: boolean;
   readOnly?: boolean;
   removeOnBackspace?: boolean;
+  maxLength?: number;
 }
 
 interface State {
@@ -27,7 +28,12 @@ export default class ReactTagInput extends React.Component<ReactTagInputProps, S
   inputRef: React.RefObject<HTMLInputElement> = React.createRef();
 
   onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ input: e.target.value });
+    const input = e.target.value;
+    if (input !== "" && !/^[ㄱ-ㅎ|가-힣|a-z|A-Z|0-9|\*]+$/.test(input)) {
+      e.stopPropagation();
+      return;
+    }
+    this.setState({ input });
   }
 
   onInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -35,7 +41,7 @@ export default class ReactTagInput extends React.Component<ReactTagInputProps, S
     const { input } = this.state;
     const { validator, removeOnBackspace } = this.props;
 
-    // On enter
+    // On enter or space
     if (e.keyCode === 13) {
 
       // Prevent form submission if tag input is nested in <form>
@@ -51,7 +57,7 @@ export default class ReactTagInput extends React.Component<ReactTagInputProps, S
       }
 
       // Add input to tag list
-      this.addTag(input);
+      this.addTag(input.replace(/\s/g, ""));
 
     }
     // On backspace or delete
@@ -99,7 +105,7 @@ export default class ReactTagInput extends React.Component<ReactTagInputProps, S
 
     const { input } = this.state;
 
-    const { tags, placeholder, maxTags, editable, readOnly, validator, removeOnBackspace } = this.props;
+    const { tags, placeholder, maxTags, editable, readOnly, validator, removeOnBackspace, maxLength } = this.props;
 
     const maxTagsReached = maxTags !== undefined ? tags.length >= maxTags : false;
 
@@ -121,6 +127,8 @@ export default class ReactTagInput extends React.Component<ReactTagInputProps, S
             remove={this.removeTag}
             validator={validator}
             removeOnBackspace={removeOnBackspace}
+            maxLength={maxLength}
+            spaceRemove={true}
           />
         ))}
         {showInput &&
@@ -131,6 +139,7 @@ export default class ReactTagInput extends React.Component<ReactTagInputProps, S
             placeholder={placeholder || "Type and press enter"}
             onChange={this.onInputChange}
             onKeyDown={this.onInputKeyDown}
+            maxLength={maxLength}
           />
         }
       </div>

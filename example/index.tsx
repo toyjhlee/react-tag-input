@@ -17,15 +17,15 @@ const initialSettings: ReactTagInputProps = {
 };
 
 function Example() {
-  const [tags, setTags] = React.useState<string[]>(["machine-1", "machine-2"]);
+  const [tags, setTags] = React.useState<string[]>(["machine1", "machine2"]);
   const [settings, setSettings] = React.useState(initialSettings);
-  console.log(tags, settings);
   return (
     <>
       <ReactTagInput
         {...settings}
         tags={tags}
         onChange={(value) => setTags(value)}
+        maxLength={15}
       />
 
       <div className="form">

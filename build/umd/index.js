@@ -246,7 +246,7 @@
             };
             _this.onInputKeyDown = function (e) {
                 var input = _this.state.input;
-                var _a = _this.props, validator = _a.validator, removeOnBackspace = _a.removeOnBackspace;
+                var _a = _this.props, validator = _a.validator, removeOnBackspace = _a.removeOnBackspace, spaceRemove = _a.spaceRemove;
                 if (e.keyCode === 13) {
                     e.preventDefault();
                     if (input === "") {
@@ -256,7 +256,12 @@
                     if (!valid) {
                         return;
                     }
-                    _this.addTag(input.replace(/\s/g, ""));
+                    if (spaceRemove) {
+                        _this.addTag(input.replace(/\s/g, ""));
+                    }
+                    else {
+                        _this.addTag(input);
+                    }
                 }
                 else if (removeOnBackspace && (e.keyCode === 8 || e.keyCode === 46)) {
                     if (input !== "") {
@@ -294,12 +299,12 @@
         ReactTagInput.prototype.render = function () {
             var _this = this;
             var input = this.state.input;
-            var _a = this.props, tags = _a.tags, placeholder = _a.placeholder, maxTags = _a.maxTags, editable = _a.editable, readOnly = _a.readOnly, validator = _a.validator, removeOnBackspace = _a.removeOnBackspace, maxLength = _a.maxLength;
+            var _a = this.props, tags = _a.tags, placeholder = _a.placeholder, maxTags = _a.maxTags, editable = _a.editable, readOnly = _a.readOnly, validator = _a.validator, removeOnBackspace = _a.removeOnBackspace, maxLength = _a.maxLength, spaceRemove = _a.spaceRemove;
             var maxTagsReached = maxTags !== undefined ? tags.length >= maxTags : false;
             var isEditable = readOnly ? false : (editable || false);
             var showInput = !readOnly && !maxTagsReached;
             return (React.createElement("div", { className: classSelectors.wrapper },
-                tags.map(function (tag, i) { return (React.createElement(Tag, { key: i, value: tag, index: i, editable: isEditable, readOnly: readOnly || false, inputRef: _this.inputRef, update: _this.updateTag, remove: _this.removeTag, validator: validator, removeOnBackspace: removeOnBackspace, maxLength: maxLength, spaceRemove: true })); }),
+                tags.map(function (tag, i) { return (React.createElement(Tag, { key: i, value: tag, index: i, editable: isEditable, readOnly: readOnly || false, inputRef: _this.inputRef, update: _this.updateTag, remove: _this.removeTag, validator: validator, removeOnBackspace: removeOnBackspace, maxLength: maxLength, spaceRemove: spaceRemove })); }),
                 showInput &&
                     React.createElement("input", { ref: this.inputRef, value: input, className: classSelectors.input, placeholder: placeholder || "Type and press enter", onChange: this.onInputChange, onKeyDown: this.onInputKeyDown, maxLength: maxLength })));
         };

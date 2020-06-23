@@ -10,6 +10,7 @@ export interface ReactTagInputProps {
     readOnly?: boolean;
     removeOnBackspace?: boolean;
     maxLength?: number;
+    spaceRemove?: boolean;
 }
 interface State {
     input: string;

@@ -14,6 +14,7 @@ export interface ReactTagInputProps {
   readOnly?: boolean;
   removeOnBackspace?: boolean;
   maxLength?: number;
+  spaceRemove?: boolean;
 }
 
 interface State {
@@ -39,7 +40,7 @@ export default class ReactTagInput extends React.Component<ReactTagInputProps, S
   onInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
 
     const { input } = this.state;
-    const { validator, removeOnBackspace } = this.props;
+    const { validator, removeOnBackspace, spaceRemove } = this.props;
 
     // On enter or space
     if (e.keyCode === 13) {
@@ -57,7 +58,12 @@ export default class ReactTagInput extends React.Component<ReactTagInputProps, S
       }
 
       // Add input to tag list
-      this.addTag(input.replace(/\s/g, ""));
+
+      if (spaceRemove) {
+        this.addTag(input.replace(/\s/g, ""));
+      } else {
+        this.addTag(input);
+      }
 
     }
     // On backspace or delete
@@ -105,7 +111,7 @@ export default class ReactTagInput extends React.Component<ReactTagInputProps, S
 
     const { input } = this.state;
 
-    const { tags, placeholder, maxTags, editable, readOnly, validator, removeOnBackspace, maxLength } = this.props;
+    const { tags, placeholder, maxTags, editable, readOnly, validator, removeOnBackspace, maxLength, spaceRemove } = this.props;
 
     const maxTagsReached = maxTags !== undefined ? tags.length >= maxTags : false;
 
@@ -128,7 +134,7 @@ export default class ReactTagInput extends React.Component<ReactTagInputProps, S
             validator={validator}
             removeOnBackspace={removeOnBackspace}
             maxLength={maxLength}
-            spaceRemove={true}
+            spaceRemove={spaceRemove}
           />
         ))}
         {showInput &&

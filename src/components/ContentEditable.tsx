@@ -10,6 +10,8 @@ interface Props {
   remove: () => void;
   validator?: (value: string) => boolean;
   removeOnBackspace?: boolean;
+  maxLength?: number;
+  spaceRemove?: boolean;
 }
 
 export class ContentEditable extends React.Component<Props> {
@@ -22,6 +24,8 @@ export class ContentEditable extends React.Component<Props> {
 
   // Save value before input is focused / user starts typing
   preFocusedValue: string = "";
+
+  regSpecialCharacter: RegExp = /[^ㄱ-ㅎ|가-힣|a-z|A-Z|0-9|\*]/g;
 
   componentDidMount() {
     this.preFocusedValue = this.getValue();
@@ -50,7 +54,7 @@ export class ContentEditable extends React.Component<Props> {
     this.focused = false;
 
     const ref = this.props.innerEditableRef.current;
-    const { validator, change } = this.props;
+    const { validator, change, maxLength } = this.props;
 
     if (!this.removed && ref) {
 
@@ -70,14 +74,25 @@ export class ContentEditable extends React.Component<Props> {
         }
       }
 
-      change(ref.innerText);
+      change(this.finishConvert(ref.innerText));
+    }
+  }
 
+  finishConvert = (origin: string) => {
+    const { maxLength, spaceRemove } = this.props;
+    let input: string = origin;
+    if (spaceRemove) { // TEST: 한글 + space
+      input = input.replace(/\s/g, "");
     }
 
+    if (maxLength) {
+      input = input.slice(0, maxLength);
+    }
+
+    return input;
   }
 
   onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-
     // On enter, focus main tag input
     if (e.keyCode === 13) {
       e.preventDefault();
@@ -86,7 +101,7 @@ export class ContentEditable extends React.Component<Props> {
     }
 
     // On backspace, if no content in ref, remove tag and focus main tag input
-    const { removeOnBackspace } = this.props;
+    const { removeOnBackspace, maxLength } = this.props;
     const value = this.getValue();
     if (removeOnBackspace && e.keyCode === 8 && value === "") {
       this.removed = true;
@@ -95,6 +110,49 @@ export class ContentEditable extends React.Component<Props> {
       return;
     }
 
+    const overMaxLength = maxLength && this.getValue().trim().length >= maxLength;
+
+    if ((e.ctrlKey || e.metaKey) && e.keyCode === 86) { // paste
+      if (overMaxLength) {
+        e.preventDefault();
+        return;
+      }
+    }
+
+    if (overMaxLength && !this.isAllowedKeyCode(e)) {
+      e.preventDefault();
+      return;
+    }
+
+    if (!this.hasSpecialCharacter(e) && !this.isAllowedKeyCode(e)) {
+      e.preventDefault();
+      return;
+    }
+  }
+
+  hasSpecialCharacter = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const inputChar = String.fromCharCode(e.keyCode);
+    let ret = false;
+    if (inputChar === "" && inputChar == null) {
+      ret = false;
+    } else {
+      if (inputChar.replace(this.regSpecialCharacter, "") === "") {
+        ret = false;
+      } else {
+        ret = true;
+      }
+    }
+    return ret;
+  }
+
+  isAllowedKeyCode = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    return e.keyCode === 8 ||
+        e.keyCode === 38 ||
+        e.keyCode === 39 ||
+        e.keyCode === 37 ||
+        e.keyCode === 40 ||
+        e.ctrlKey ||
+        e.metaKey;
   }
 
   getValue = () => {

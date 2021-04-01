@@ -1,6 +1,6 @@
 {
   "name": "@toyjhlee/react-tag-input",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "A simple tag input component for React with editable tags",
   "main": "./build/umd/index.min.js",
   "module": "./build/module/index.js",
